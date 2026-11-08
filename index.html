@@ -291,7 +291,7 @@
         </div>
 
         <div>
-          <button type="submit" id="confirmClaimBtn" disabled class="w-full py-3 bg-slate-300 text-slate-500 font-bold text-xs rounded-xl transition cursor-not-allowed">
+          <button type="submit" id="confirmClaimBtn" disabled class="w-full py-3.5 bg-slate-200 text-slate-400 font-bold text-xs rounded-xl transition cursor-not-allowed">
             Select a Store Above First
           </button>
         </div>
@@ -795,9 +795,11 @@
       document.getElementById('selectedStorePrice').value = '0';
       document.getElementById('selectedStoreUrl').value = '';
       document.getElementById('claimStorePriceDisplay').value = 'Select store above';
+      
       const confirmBtn = document.getElementById('confirmClaimBtn');
       confirmBtn.disabled = true;
-      confirmBtn.className = 'w-full py-3 bg-slate-300 text-slate-500 font-bold text-xs rounded-xl transition cursor-not-allowed';
+      confirmBtn.innerHTML = 'Select a Store Above First';
+      confirmBtn.className = 'w-full py-3.5 bg-slate-200 text-slate-400 font-bold text-xs rounded-xl transition cursor-not-allowed';
 
       const storeContainer = document.getElementById('modalStoreLinksContainer');
       if (item.stores && item.stores.length > 0) {
@@ -837,6 +839,7 @@
 
       const confirmBtn = document.getElementById('confirmClaimBtn');
       confirmBtn.disabled = false;
+      confirmBtn.innerHTML = '<i class="fa-solid fa-gift mr-1.5"></i> Confirm & Add to My Selected Gifts';
       confirmBtn.className = 'w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-sm rounded-xl transition shadow-md';
     }
 
@@ -1136,7 +1139,6 @@
       }
 
       if (editId) {
-        // Editing existing item
         const existingItem = wishlist.find(i => i.id === editId);
         if (existingItem) {
           existingItem.title = title;
@@ -1152,7 +1154,6 @@
           alert('Wishlist item successfully updated!');
         }
       } else {
-        // Adding new item
         const newItem = {
           title,
           description: `Quantity requested: ${qtyRequired}`,
@@ -1186,16 +1187,13 @@
       const item = wishlist.find(i => i.id === itemId);
       if (!item) return;
 
-      // Switch to Add/Edit tab
       switchAdminTab('wishlist');
 
-      // Populate form fields
       document.getElementById('editItemId').value = item.id;
       document.getElementById('admTitle').value = item.title;
       document.getElementById('admQty').value = item.qtyRequired;
       document.getElementById('admImage').value = item.image || '';
 
-      // Clear & populate stores
       for (let i = 1; i <= 3; i++) {
         document.getElementById(`admStore${i}Name`).value = '';
         document.getElementById(`admStore${i}Price`).value = '';
@@ -1213,7 +1211,6 @@
         });
       }
 
-      // Update button text & show cancel
       document.getElementById('formHeaderTitle').innerText = `Edit Item: "${item.title}"`;
       document.getElementById('saveItemFormBtn').innerText = 'Save Changes';
       document.getElementById('cancelEditBtn').classList.remove('hidden');
