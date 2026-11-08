@@ -111,7 +111,6 @@
         <h2 class="text-2xl font-playful text-slate-800 flex items-center gap-2">
           <i class="fa-solid fa-gift text-sky-500"></i> Baby Elijah's Wishlist
         </h2>
-        <span class="text-xs text-slate-500 italic">Sorted by submission date (newest first)</span>
       </div>
 
       <!-- Wishlist Items Cards Feed -->
@@ -134,10 +133,15 @@
         <!-- Local cart items -->
       </div>
       
-      <div id="cartTotalSummary" class="pt-3 border-t border-slate-200 flex justify-between items-center font-bold text-slate-800 text-sm">
-        <span>Total Items Selected: <span id="cartTotalQty" class="text-sky-600">0</span></span>
-        <span>Estimated Total: <span id="cartTotalPrice" class="text-emerald-600">R0.00</span></span>
+      <div id="cartTotalSummary" class="pt-3 border-t border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 font-bold text-slate-800 text-sm mb-5">
+        <div>Total Items Selected: <span id="cartTotalQty" class="text-sky-600">0</span></div>
+        <div>Estimated Total: <span id="cartTotalPrice" class="text-emerald-600">R0.00</span></div>
       </div>
+
+      <!-- Bulk Checkout Button -->
+      <button onclick="openBulkCheckoutModal()" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-sm rounded-xl transition shadow-md flex items-center justify-center gap-2">
+        <i class="fa-solid fa-circle-check"></i> I will buy these items (Checkout Summary)
+      </button>
     </div>
 
   </div>
@@ -289,6 +293,49 @@
         <div class="pt-2">
           <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-sm rounded-xl transition shadow-md flex items-center justify-center gap-2">
             <i class="fa-solid fa-gift"></i> Confirm & Add to My Selected Gifts
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Bulk Checkout Modal -->
+  <div id="bulkCheckoutModal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-100 rounded-3xl w-full max-w-md p-6 md:p-8 relative shadow-2xl text-left max-h-[90vh] overflow-y-auto">
+      <button onclick="closeBulkCheckoutModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+
+      <div class="text-center mb-4">
+        <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2 text-xl">
+          <i class="fa-solid fa-clipboard-list"></i>
+        </div>
+        <h3 class="text-2xl font-playful text-slate-800">Checkout Summary</h3>
+        <p class="text-xs text-slate-500 mt-1">Review your selected items and confirm your gifts for Baby Elijah!</p>
+      </div>
+
+      <div id="bulkCheckoutList" class="space-y-2 mb-4 max-h-48 overflow-y-auto pr-1">
+        <!-- Filled dynamically -->
+      </div>
+
+      <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl mb-4 text-xs space-y-1">
+        <div class="flex justify-between font-bold text-slate-700">
+          <span>Total Estimated Cost:</span>
+          <span id="bulkCheckoutTotal" class="text-emerald-600">R0.00</span>
+        </div>
+      </div>
+
+      <form onsubmit="handleBulkCheckoutSubmit(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Your Name / Family Name *</label>
+          <input type="text" id="bulkGiverName" required placeholder="e.g. Aunt Sarah & Family" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-sky-500">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" onclick="copyCheckoutSummary()" class="py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-copy"></i> Copy List
+          </button>
+          <button type="submit" class="py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-xs rounded-xl transition shadow-md">
+            Confirm & Claim
           </button>
         </div>
       </form>
@@ -757,7 +804,6 @@
       const unitPrice = parseFloat(item.price) || 0;
       document.getElementById('claimPriceDisplay').value = `R${unitPrice.toFixed(2)}`;
 
-      // Populate multiple store links
       const storeContainer = document.getElementById('modalStoreLinksContainer');
       if (item.stores && item.stores.length > 0) {
         storeContainer.innerHTML = item.stores.map(s => `
@@ -803,11 +849,97 @@
       }
 
       const unitPrice = parseFloat(item.price) || 0;
-      addToLocalCart(item.title, qty, unitPrice);
+      addToLocalCart(item.title, qty, unitPrice, item.id);
 
       closeClaimModal();
       confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
       showThankYouModal(`Your sweet decision to gift "${item.title}" means so much to us and Baby Elijah! ❤️`);
+    }
+
+    // Bulk Checkout Modal Functions
+    function openBulkCheckoutModal() {
+      const cart = JSON.parse(localStorage.getItem('userShowerCart') || '[]');
+      if (cart.length === 0) {
+        alert("Your selected gifts list is empty! Choose items from the wishlist first.");
+        return;
+      }
+
+      const listContainer = document.getElementById('bulkCheckoutList');
+      let totalPrice = 0;
+
+      listContainer.innerHTML = cart.map(item => {
+        const itemTotal = (parseFloat(item.price) || 0) * item.qty;
+        totalPrice += itemTotal;
+        return `
+          <div class="flex justify-between items-center bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-xs">
+            <span class="font-semibold text-slate-700">${escapeHtml(item.title)} (x${item.qty})</span>
+            <span class="font-bold text-emerald-600">R${itemTotal.toFixed(2)}</span>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('bulkCheckoutTotal').innerText = `R${totalPrice.toFixed(2)}`;
+      document.getElementById('bulkGiverName').value = '';
+      document.getElementById('bulkCheckoutModal').classList.remove('hidden');
+    }
+
+    function closeBulkCheckoutModal() {
+      document.getElementById('bulkCheckoutModal').classList.add('hidden');
+    }
+
+    function copyCheckoutSummary() {
+      const cart = JSON.parse(localStorage.getItem('userShowerCart') || '[]');
+      const giverName = document.getElementById('bulkGiverName').value.trim() || 'A Friend';
+      let totalPrice = 0;
+      let text = `Hi! ${giverName} has selected the following gifts for Baby Elijah:\n`;
+      
+      cart.forEach(item => {
+        const itemTotal = (parseFloat(item.price) || 0) * item.qty;
+        totalPrice += itemTotal;
+        text += `- ${item.title} (Qty: ${item.qty}) - R${itemTotal.toFixed(2)}\n`;
+      });
+      text += `Total Estimated Cost: R${totalPrice.toFixed(2)}`;
+
+      navigator.clipboard.writeText(text);
+      alert("Checkout summary copied to clipboard! You can now paste and send it via WhatsApp.");
+    }
+
+    function handleBulkCheckoutSubmit(e) {
+      e.preventDefault();
+      const giverName = document.getElementById('bulkGiverName').value.trim();
+      const cart = JSON.parse(localStorage.getItem('userShowerCart') || '[]');
+
+      if (cart.length === 0) return;
+
+      cart.forEach(cartItem => {
+        const item = wishlist.find(i => i.id === cartItem.id || i.title === cartItem.title);
+        if (item) {
+          item.qtyClaimed = (item.qtyClaimed || 0) + cartItem.qty;
+          if (!item.claims) item.claims = [];
+          item.claims.push({ qty: cartItem.qty, giver: giverName, time: new Date().toLocaleDateString() });
+
+          if (itemsRef && item.id && !item.id.startsWith('item_')) {
+            itemsRef.child(item.id).set(item);
+          } else if (itemsRef) {
+            itemsRef.orderByChild('title').equalTo(item.title).once('child_added', (snapshot) => {
+              snapshot.ref.set(item);
+            });
+          }
+        }
+      });
+
+      if (!itemsRef) {
+        localStorage.setItem('showerWishlist', JSON.stringify(wishlist));
+        renderWishlist();
+        renderAdminManageItems();
+      }
+
+      localStorage.removeItem('userShowerCart');
+      renderLocalCart();
+      closeBulkCheckoutModal();
+
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      showThankYouModal(`Thank you so much ${giverName}! All your selected gifts have been successfully checked out and recorded for Baby Elijah! ❤️`);
     }
 
     function openCashModal() {
@@ -838,13 +970,13 @@
     }
 
     // Local Storage Cart Tracking & Estimated Total Calculation
-    function addToLocalCart(title, qty, price) {
+    function addToLocalCart(title, qty, price, id) {
       let cart = JSON.parse(localStorage.getItem('userShowerCart') || '[]');
       const existing = cart.find(c => c.title === title);
       if (existing) {
         existing.qty += qty;
       } else {
-        cart.push({ title, qty, price });
+        cart.push({ title, qty, price, id });
       }
       localStorage.setItem('userShowerCart', JSON.stringify(cart));
       renderLocalCart();
@@ -968,7 +1100,6 @@
       const price = parseFloat(document.getElementById('admPrice').value) || 0;
       const image = document.getElementById('admImage').value.trim();
 
-      // Collect multiple store links
       let stores = [];
       for (let i = 1; i <= 4; i++) {
         const sName = document.getElementById(`admStore${i}Name`).value.trim();
