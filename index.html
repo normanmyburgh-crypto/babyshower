@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Baby Elijah's Baby Shower Registry & Celebration!</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Canvas Confetti Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts matching the Gender Reveal Site Theme -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <!-- Firebase SDKs for Live Cross-Device Sync -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <style>
+    body { 
+      font-family: 'Poppins', sans-serif; 
+      scroll-behavior: smooth;
+      background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 50%, #fef3c7 100%);
+    }
+    .font-playful { font-family: 'Fredoka One', cursive; }
+    
+    .bg-animated {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: -10;
+      overflow: hidden;
+      background: radial-gradient(circle at 20% 20%, rgba(224, 242, 254, 0.8) 0%, transparent 40%),
+                  radial-gradient(circle at 80% 80%, rgba(254, 243, 199, 0.8) 0%, transparent 40%),
+                  linear-gradient(180deg, #f0fdf4 0%, #e0f2fe 100%);
+    }
+
+    .cloud-bubble {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(4px);
+      border-radius: 999px;
+      animation: float 18s infinite ease-in-out;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-30px) scale(1.05); }
+    }
+
+    .modal-backdrop { 
+      background-color: rgba(15, 23, 42, 0.65); 
+      backdrop-filter: blur(6px); 
+    }
+
+    .progress-fill {
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  </style>
+</head>
+<body class="text-slate-700 min-h-screen relative flex flex-col justify-between overflow-x-hidden">
+
+  <!-- Background Animated Cloud Effect -->
+  <div class="bg-animated">
+    <div class="cloud-bubble w-72 h-72 -top-10 -left-10" style="animation-delay: 0s;"></div>
+    <div class="cloud-bubble w-96 h-96 top-1/3 -right-20" style="animation-delay: 3s;"></div>
+    <div class="cloud-bubble w-80 h-80 -bottom-10 left-1/4" style="animation-delay: 6s;"></div>
+  </div>
+
+  <!-- Parent/Admin Password Settings Gear Button -->
+  <button onclick="toggleAdminModal()" class="fixed top-4 right-4 z-40 bg-white/85 hover:bg-white border border-sky-200 backdrop-blur-md p-3 rounded-full text-sky-600 transition shadow-lg hover:scale-105" title="Parent Admin Panel">
+    <i class="fa-solid fa-lock text-xl"></i>
+  </button>
+
+  <!-- Main Container -->
+  <div class="container mx-auto px-4 py-8 max-w-4xl text-center z-10 my-auto">
+    
+    <!-- Header Banner Card -->
+    <div class="bg-white/90 backdrop-blur-md border border-white/80 rounded-3xl p-6 md:p-10 shadow-xl mb-8 transform transition">
+      <div class="inline-block bg-sky-100 text-sky-600 border border-sky-200 text-xs px-4 py-1.5 rounded-full mb-3 font-semibold uppercase tracking-wider">
+        <i class="fa-solid fa-baby-carriage mr-1"></i> You're Invited!
+      </div>
+      <h1 class="text-3xl md:text-5xl font-playful text-slate-800 mb-3 leading-tight">
+        Baby Elijah's <span class="text-sky-500">Baby Shower</span> Registry
+      </h1>
+      <p class="text-slate-600 max-w-xl mx-auto text-sm md:text-base leading-relaxed mb-6">
+        We can't wait to celebrate our little blessing with you! Below is a wishlist of items that will help us prepare for Baby Elijah's arrival.
+      </p>
+
+      <!-- Action Buttons Header Bar -->
+      <div class="flex flex-wrap items-center justify-center gap-3">
+        <button onclick="openRsvpGuideModal()" class="px-5 py-3 rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-semibold text-sm shadow-md transition flex items-center gap-2">
+          <i class="fa-solid fa-clipboard-check text-amber-300"></i> Attendance & Guide
+        </button>
+        <button onclick="openDeliveryAddressModal()" class="px-5 py-3 rounded-2xl bg-indigo-500 hover:bg-indigo-600 text-white font-semibold text-sm shadow-md transition flex items-center gap-2">
+          <i class="fa-solid fa-location-dot text-pink-200"></i> Delivery Address
+        </button>
+        <button onclick="openCashModal()" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold text-sm shadow-md transition flex items-center gap-2">
+          <i class="fa-solid fa-hand-holding-dollar text-yellow-200"></i> Gift Money / EFT Instead
+        </button>
+        <button onclick="scrollToCart()" class="px-5 py-3 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm border border-slate-200 transition flex items-center gap-2 shadow-sm">
+          <i class="fa-solid fa-basket-shopping text-sky-500"></i> My Selected Gifts <span id="cartCountBadge" class="bg-sky-500 text-white text-xs px-2 py-0.5 rounded-full">0</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Wishlist Grid Container -->
+    <div class="space-y-6 text-left">
+      <div class="flex flex-wrap items-center justify-between gap-2 px-2">
+        <h2 class="text-2xl font-playful text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-gift text-sky-500"></i> Baby Elijah's Wishlist
+        </h2>
+        <span class="text-xs text-slate-500 italic">Sorted by submission date (newest first)</span>
+      </div>
+
+      <!-- Wishlist Items Cards Feed -->
+      <div id="wishlistFeed" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Dynamically populated wishlist items -->
+      </div>
+    </div>
+
+    <!-- User Local Cart Summary Section -->
+    <div id="cartSummarySection" class="mt-12 bg-white/90 backdrop-blur-md border border-white/80 rounded-3xl p-6 md:p-8 shadow-xl text-left">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-playful text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-bag-shopping text-emerald-500"></i> Your Selected Gifts Summary
+        </h3>
+        <button onclick="clearLocalCart()" class="text-xs text-rose-500 hover:text-rose-600 font-medium">Clear My Local List</button>
+      </div>
+      <p class="text-xs text-slate-500 mb-4">This list calculates your estimated spending total and is stored on your browser as a quick reference!</p>
+      
+      <div id="cartItemsList" class="space-y-2 mb-4">
+        <!-- Local cart items -->
+      </div>
+      
+      <div id="cartTotalSummary" class="pt-3 border-t border-slate-200 flex justify-between items-center font-bold text-slate-800 text-sm">
+        <span>Total Items Selected: <span id="cartTotalQty" class="text-sky-600">0</span></span>
+        <span>Estimated Total: <span id="cartTotalPrice" class="text-emerald-600">R0.00</span></span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Welcome / Attendance RSVP & Guide Modal -->
+  <div id="rsvpModal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-100 rounded-3xl w-full max-w-lg p-6 md:p-8 relative shadow-2xl text-left max-h-[90vh] overflow-y-auto">
+      <button onclick="closeRsvpGuideModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 bg-sky-100 text-sky-500 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
+          <i class="fa-solid fa-heart"></i>
+        </div>
+        <h3 class="text-2xl font-playful text-slate-800">Welcome & Thank You!</h3>
+        <p class="text-xs text-slate-500 mt-1">We are so excited to celebrate Baby Elijah with you!</p>
+      </div>
+
+      <!-- Quick 3-Step Guide -->
+      <div class="bg-sky-50 border border-sky-100 rounded-2xl p-4 mb-6 space-y-2 text-xs text-slate-700">
+        <p class="font-semibold text-sky-800 flex items-center gap-1.5 text-sm mb-2">
+          <i class="fa-solid fa-circle-info text-sky-500"></i> How This Registry Works:
+        </p>
+        <div class="flex items-start gap-2">
+          <span class="bg-sky-200 text-sky-800 rounded-full w-5 h-5 flex items-center justify-center font-bold text-[10px] shrink-0">1</span>
+          <p>Browse the wishlist items below. Click to view store options (Amazon, Takealot, Checkers, Babycity, etc.).</p>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="bg-sky-200 text-sky-800 rounded-full w-5 h-5 flex items-center justify-center font-bold text-[10px] shrink-0">2</span>
+          <p>Click <strong>"I Will Buy This"</strong> to claim an item. If you cannot attend, check our Delivery Address button for home delivery options!</p>
+        </div>
+      </div>
+
+      <!-- Attendance RSVP Form -->
+      <form onsubmit="handleRsvpSubmit(event)" class="space-y-4">
+        <h4 class="font-bold text-sm text-slate-800 border-b border-slate-100 pb-2">RSVP for Food & Drinks Planning:</h4>
+        
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Your Full Name *</label>
+          <input type="text" id="rsvpName" required placeholder="e.g. Aunt Sarah & Family" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-sky-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Will you be attending the baby shower? *</label>
+          <select id="rsvpStatus" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-sky-500">
+            <option value="Attending">Yes! I will be attending 🎉</option>
+            <option value="Not Attending (Gifting Only)">Cannot attend, but sending love & gifts! ❤️</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Number of Guests Attending (including yourself)</label>
+          <input type="number" id="rsvpGuests" min="1" value="1" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-sky-500">
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-xl transition shadow-md">
+          Save RSVP & Continue
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delivery Address Popup Modal -->
+  <div id="deliveryAddressModal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-100 rounded-3xl w-full max-w-lg p-6 md:p-8 relative shadow-2xl text-left max-h-[90vh] overflow-y-auto">
+      <button onclick="closeDeliveryAddressModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+
+      <div class="text-center mb-5">
+        <div class="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-2 text-xl">
+          <i class="fa-solid fa-house-chimney"></i>
+        </div>
+        <h3 class="text-2xl font-playful text-slate-800">Gift Delivery Information</h3>
+        <p class="text-xs text-slate-500 mt-1">For family & friends who cannot attend in person but would like to send a gift directly!</p>
+      </div>
+
+      <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 mb-5 space-y-3 text-xs">
+        <div>
+          <span class="text-slate-400 block font-semibold mb-0.5">Recipient Name:</span>
+          <span id="displayRecipientName" class="font-bold text-slate-800 text-sm">Elijah's Parents (Norman & Jenny)</span>
+        </div>
+        <div>
+          <span class="text-slate-400 block font-semibold mb-0.5">Contact Cell Number:</span>
+          <span id="displayRecipientCell" class="font-bold text-slate-800 text-sm">082 123 4567</span>
+        </div>
+        <div>
+          <span class="text-slate-400 block font-semibold mb-0.5">Delivery Address:</span>
+          <span id="displayDeliveryAddress" class="font-bold text-slate-800 text-sm leading-relaxed block">123 Kookrus Street, Meyerton, Gauteng, 1960</span>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <a id="googleMapsLink" href="https://maps.google.com" target="_blank" class="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white font-semibold text-xs rounded-xl transition flex items-center justify-center gap-2 shadow-md">
+          <i class="fa-solid fa-map-location-dot"></i> Open Delivery Address in Google Maps
+        </a>
+        <button onclick="copyDeliveryAddress()" class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-copy"></i> Copy Full Address Details to Clipboard
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Item Store Links & Claiming Modal -->
+  <div id="claimModal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-100 rounded-3xl w-full max-w-lg p-6 md:p-8 relative shadow-2xl text-left max-h-[90vh] overflow-y-auto">
+      <button onclick="closeClaimModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+
+      <div class="mb-4">
+        <span class="bg-amber-100 text-amber-700 text-xs px-2.5 py-1 rounded-full font-semibold">Gift Selection & Store Options</span>
+        <h3 id="claimItemTitle" class="text-xl font-bold text-slate-800 mt-2">Item Title</h3>
+        <p id="claimItemDesc" class="text-xs text-slate-500 mt-1">Item Description</p>
+      </div>
+
+      <!-- Multiple Store Links Option List -->
+      <div class="mb-5">
+        <label class="block text-xs font-semibold text-slate-600 mb-2">Choose preferred store option to view/purchase:</label>
+        <div id="modalStoreLinksContainer" class="space-y-2">
+          <!-- Dynamically populated store links -->
+        </div>
+      </div>
+
+      <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl mb-4 text-xs flex justify-between items-center">
+        <span>Available remaining:</span>
+        <span id="claimAvailableBadge" class="font-bold text-sky-600 text-sm">0 left</span>
+      </div>
+
+      <form onsubmit="handleConfirmClaim(event)" class="space-y-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Quantity to buy</label>
+            <input type="number" id="claimQty" min="1" value="1" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-sky-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Estimated Unit Price (R)</label>
+            <input type="text" id="claimPriceDisplay" readonly class="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm font-bold text-emerald-600" value="R0.00">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Your Name (Optional)</label>
+          <input type="text" id="claimGiverName" placeholder="Leave blank if you'd prefer to stay anonymous" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-sky-500">
+          <span class="text-[11px] text-slate-400 mt-1 block">You can leave this blank if you'd rather not say who bought it!</span>
+        </div>
+
+        <div class="pt-2">
+          <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-sm rounded-xl transition shadow-md flex items-center justify-center gap-2">
+            <i class="fa-solid fa-gift"></i> Confirm & Add to My Selected Gifts
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Cash / EFT Banking Details Modal -->
+  <div id="cashModal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-100 rounded-3xl w-full max-w-md p-6 relative shadow-2xl text-left">
+      <button onclick="closeCashModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+
+      <div class="text-center mb-4">
+        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2 text-xl">
+          <i class="fa-solid fa-building-columns"></i>
+        </div>
+        <h3 class="text-xl font-playful text-slate-800">Gift Money / EFT Instead</h3>
+        <p class="text-xs text-slate-500">If you'd prefer to contribute cash or EFT towards Elijah's future essentials, our bank details are below:</p>
+      </div>
+
+      <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-4 space-y-2 text-xs">
+        <div class="flex justify-between border-b border-slate-200 pb-1.5">
+          <span class="text-slate-500">Account Holder:</span>
+          <span id="bankHolderText" class="font-bold text-slate-800">Elijah Myburgh / Family</span>
+        </div>
+        <div class="flex justify-between border-b border-slate-200 pb-1.5">
+          <span class="text-slate-500">Bank Name:</span>
+          <span id="bankNameText" class="font-bold text-slate-800">Capitec Bank / FNB</span>
+        </div>
+        <div class="flex justify-between border-b border-slate-200 pb-1.5">
+          <span class="text-slate-500">Account Number:</span>
+          <span id="bankAccText" class="font-bold text-slate-800">1234567890</span>
+        </div>
+        <div class="flex justify-between border-b border-slate-200 pb-1.5">
+          <span class="text-slate-500">Branch Code:</span>
+          <span id="bankBranchText" class="font-bold text-slate-800">470010</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Reference:</span>
+          <span class="font-bold text-emerald-600">Elijah-Shower</span>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <button onclick="copyBankingDetails()" class="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white font-semibold text-xs rounded-xl transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-copy"></i> Copy Banking Details to Clipboard
+        </button>
+        <button onclick="confirmCashContribution()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl transition">
+          I Have Chosen EFT / Cash Contribution
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warm Automated Thank You Modal -->
+  <div id="thankYouModal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-100 rounded-3xl w-full max-w-sm p-6 relative shadow-2xl text-center">
+      <div class="w-16 h-16 bg-pink-100 text-pink-500 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl">
+        <i class="fa-solid fa-heart-pulse"></i>
+      </div>
+      <h3 class="text-2xl font-playful text-slate-800 mb-2">Thank You So Much!</h3>
+      <p id="thankYouMessageText" class="text-xs text-slate-600 leading-relaxed mb-6">
+        Your love, blessings, and generosity mean the absolute world to us as we prepare to welcome Baby Elijah into our family! ❤️
+      </p>
+      <button onclick="closeThankYouModal()" class="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs rounded-xl transition">
+        Close & Continue Browsing
+      </button>
+    </div>
+  </div>
+
+  <!-- Password Protected Parent Admin Modal -->
+  <div id="adminModal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white border border-slate-100 rounded-3xl w-full max-w-2xl p-6 relative shadow-2xl text-left my-8 max-h-[90vh] overflow-y-auto">
+      <button onclick="toggleAdminModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+
+      <!-- PIN Verification Step -->
+      <div id="adminPinView">
+        <div class="text-center mb-4">
+          <div class="w-12 h-12 bg-sky-100 text-sky-600 rounded-full flex items-center justify-center mx-auto mb-2 text-xl">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <h3 class="text-xl font-bold text-slate-800">Parent Admin Panel</h3>
+          <p class="text-xs text-slate-500">Enter your 4-digit password to manage wishlist items & view RSVPs.</p>
+        </div>
+
+        <input type="password" id="adminPinInput" maxlength="4" placeholder="Enter PIN" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-center text-lg tracking-widest text-slate-800 mb-3 focus:outline-none focus:border-sky-500">
+        <p id="adminPinError" class="text-xs text-rose-500 mb-3 text-center hidden">Incorrect password. Please try again.</p>
+        <button onclick="verifyAdminPin()" class="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-xl transition">Unlock Admin Controls</button>
+      </div>
+
+      <!-- Admin Controls View -->
+      <div id="adminControlsView" class="hidden space-y-6">
+        <!-- Tabs Header -->
+        <div class="flex border-b border-slate-200 overflow-x-auto">
+          <button onclick="switchAdminTab('wishlist')" id="tabBtnWishlist" class="py-2 px-4 text-xs md:text-sm font-bold border-b-2 border-sky-500 text-sky-600 whitespace-nowrap">Add Wishlist Item</button>
+          <button onclick="switchAdminTab('manageItems')" id="tabBtnManageItems" class="py-2 px-4 text-xs md:text-sm font-bold text-slate-400 whitespace-nowrap">Manage Items (<span id="totalItemsBadge">0</span>)</button>
+          <button onclick="switchAdminTab('deliverySetup')" id="tabBtnDeliverySetup" class="py-2 px-4 text-xs md:text-sm font-bold text-slate-400 whitespace-nowrap">Delivery Address</button>
+          <button onclick="switchAdminTab('rsvps')" id="tabBtnRsvps" class="py-2 px-4 text-xs md:text-sm font-bold text-slate-400 whitespace-nowrap">RSVPs (<span id="rsvpCountBadge">0</span>)</button>
+          <button onclick="switchAdminTab('purchases')" id="tabBtnPurchases" class="py-2 px-4 text-xs md:text-sm font-bold text-slate-400 whitespace-nowrap">Purchased Tracker</button>
+        </div>
+
+        <!-- Tab 1: Wishlist Submission with Multi-Links & Price -->
+        <div id="adminTabWishlist" class="space-y-4">
+          <h4 class="font-bold text-sm text-slate-800">Add New Wishlist Item (with Multiple Store Links & Price):</h4>
+          <form onsubmit="handleAdminAddItem(event)" class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Item Title *</label>
+              <input type="text" id="admTitle" required placeholder="e.g. Baby Stroller / Nappies" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Quantity Required *</label>
+                <input type="number" id="admQty" min="1" value="1" required class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Listing Price (R) *</label>
+                <input type="number" id="admPrice" min="0" step="0.01" value="250.00" required class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs">
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Item Image URL (Optional)</label>
+              <input type="text" id="admImage" placeholder="https://..." class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs">
+            </div>
+
+            <!-- Multiple Store Links Setup -->
+            <div class="border-t border-slate-200 pt-3 space-y-2">
+              <label class="block text-xs font-bold text-slate-700">Multiple Store Links (Amazon, Takealot, Checkers, Babycity, etc.):</label>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <input type="text" id="admStore1Name" placeholder="Store 1 Name (e.g. Takealot)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
+                <input type="text" id="admStore1Link" placeholder="Store 1 URL (https://...)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <input type="text" id="admStore2Name" placeholder="Store 2 Name (e.g. Amazon)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
+                <input type="text" id="admStore2Link" placeholder="Store 2 URL (https://...)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <input type="text" id="admStore3Name" placeholder="Store 3 Name (e.g. Checkers)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
+                <input type="text" id="admStore3Link" placeholder="Store 3 URL (https://...)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <input type="text" id="admStore4Name" placeholder="Store 4 Name (e.g. Babycity)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
+                <input type="text" id="admStore4Link" placeholder="Store 4 URL (https://...)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
+              </div>
+            </div>
+
+            <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl transition mt-2">+ Add Item To Registry</button>
+          </form>
+
+          <!-- Banking Details Setup -->
+          <hr class="border-slate-200">
+          <h4 class="font-bold text-sm text-slate-800">Update Banking Details for EFT Option:</h4>
+          <div class="space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
+            <input type="text" id="admBankHolder" placeholder="Account Holder" value="Elijah Myburgh / Family" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg">
+            <input type="text" id="admBankName" placeholder="Bank Name" value="Capitec Bank" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg">
+            <input type="text" id="admBankAcc" placeholder="Account Number" value="1234567890" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg">
+            <input type="text" id="admBankBranch" placeholder="Branch Code" value="470010" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg">
+            <button onclick="saveAdminBankDetails()" class="w-full py-2 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-lg">Save Banking Details</button>
+          </div>
+        </div>
+
+        <!-- Tab 2: Manage & Delete Registry Items -->
+        <div id="adminTabManageItems" class="hidden space-y-3">
+          <h4 class="font-bold text-sm text-slate-800">Active Registry Items (Click Delete to remove):</h4>
+          <div id="adminManageItemList" class="space-y-2 max-h-72 overflow-y-auto pr-1">
+            <!-- Dynamically populated management item list -->
+          </div>
+        </div>
+
+        <!-- Tab 3: Delivery Address Setup -->
+        <div id="adminTabDeliverySetup" class="hidden space-y-3">
+          <h4 class="font-bold text-sm text-slate-800">Configure Delivery Recipient & Address for Non-Attendees:</h4>
+          <div class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Recipient Name</label>
+              <input type="text" id="admRecipientName" value="Elijah's Parents (Norman & Jenny)" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Recipient Cell Number</label>
+              <input type="text" id="admRecipientCell" value="082 123 4567" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Full Delivery Address</label>
+              <textarea id="admDeliveryAddress" rows="3" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg">123 Kookrus Street, Meyerton, Gauteng, 1960</textarea>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Google Maps Link</label>
+              <input type="text" id="admGoogleMapsUrl" value="https://maps.google.com" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg">
+            </div>
+            <button onclick="saveAdminDeliveryInfo()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg">Save Delivery Information</button>
+          </div>
+        </div>
+
+        <!-- Tab 4: RSVPs List -->
+        <div id="adminTabRsvps" class="hidden space-y-3">
+          <h4 class="font-bold text-sm text-slate-800">Recorded RSVPs & Food Planning:</h4>
+          <div id="adminRsvpList" class="space-y-2 max-h-60 overflow-y-auto">
+            <!-- Dynamically populated RSVPs -->
+          </div>
+        </div>
+
+        <!-- Tab 5: Purchased Tracker -->
+        <div id="adminTabPurchases" class="hidden space-y-3">
+          <h4 class="font-bold text-sm text-slate-800">Items Fully or Partially Claimed:</h4>
+          <div id="adminPurchasesList" class="space-y-2 max-h-60 overflow-y-auto">
+            <!-- Dynamically populated purchases -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- FIREBASE CONFIGURATION ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyC3N8-sQDwJc-nEyTVQv43qG4s-WpYL7Pw",
+      authDomain: "baby-shower-70fec.firebaseapp.com",
+      projectId: "baby-shower-70fec",
+      storageBucket: "baby-shower-70fec.firebasestorage.app",
+      messagingSenderId: "204125004777",
+      appId: "1:204125004777:web:6e438b6429663ec09ae178",
+      measurementId: "G-EDENWN98DG",
+      databaseURL: "https://baby-shower-70fec-default-rtdb.firebaseio.com"
+    };
+
+    let db = null;
+    let itemsRef = null;
+    let rsvpsRef = null;
+
+    if (firebaseConfig.apiKey) {
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.database();
+      itemsRef = db.ref('shower_items');
+      rsvpsRef = db.ref('shower_rsvps');
+    }
+
+    // App State
+    let adminPin = '1234';
+    let wishlist = [];
+    let rsvps = [];
+    let currentClaimItemId = null;
+
+    // Delivery Info state
+    let deliveryInfo = {
+      name: "Elijah's Parents (Norman & Jenny)",
+      cell: "082 123 4567",
+      address: "123 Kookrus Street, Meyerton, Gauteng, 1960",
+      mapsUrl: "https://maps.google.com"
+    };
+
+    // Banking details state
+    let bankInfo = {
+      holder: "Elijah Myburgh / Family",
+      bank: "Capitec Bank / FNB",
+      acc: "1234567890",
+      branch: "470010"
+    };
+
+    // Load default or stored data on DOM load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedBank = localStorage.getItem('showerBank');
+      if (savedBank) bankInfo = JSON.parse(savedBank);
+      applyBankInfoToUI();
+
+      const savedDelivery = localStorage.getItem('showerDelivery');
+      if (savedDelivery) deliveryInfo = JSON.parse(savedDelivery);
+      applyDeliveryInfoToUI();
+
+      listenToData();
+      renderLocalCart();
+    });
+
+    function applyBankInfoToUI() {
+      document.getElementById('bankHolderText').innerText = bankInfo.holder;
+      document.getElementById('bankNameText').innerText = bankInfo.bank;
+      document.getElementById('bankAccText').innerText = bankInfo.acc;
+      document.getElementById('bankBranchText').innerText = bankInfo.branch;
+    }
+
+    function applyDeliveryInfoToUI() {
+      document.getElementById('displayRecipientName').innerText = deliveryInfo.name;
+      document.getElementById('displayRecipientCell').innerText = deliveryInfo.cell;
+      document.getElementById('displayDeliveryAddress').innerText = deliveryInfo.address;
+      document.getElementById('googleMapsLink').href = deliveryInfo.mapsUrl;
+
+      // Admin inputs populate
+      document.getElementById('admRecipientName').value = deliveryInfo.name;
+      document.getElementById('admRecipientCell').value = deliveryInfo.cell;
+      document.getElementById('admDeliveryAddress').value = deliveryInfo.address;
+      document.getElementById('admGoogleMapsUrl').value = deliveryInfo.mapsUrl;
+    }
+
+    function listenToData() {
+      if (itemsRef) {
+        itemsRef.on('value', (snapshot) => {
+          wishlist = [];
+          snapshot.forEach((child) => {
+            let val = child.val();
+            val.id = child.key;
+            wishlist.push(val);
+          });
+          wishlist.sort((a, b) => a.timestamp - b.timestamp);
+          renderWishlist();
+          renderAdminManageItems();
+        });
+
+        rsvpsRef.on('value', (snapshot) => {
+          rsvps = [];
+          snapshot.forEach((child) => {
+            rsvps.unshift(child.val());
+          });
+          renderAdminRsvps();
+        });
+      } else {
+        const savedWish = localStorage.getItem('showerWishlist');
+        wishlist = savedWish ? JSON.parse(savedWish) : getDefaultWishlist();
+        renderWishlist();
+        renderAdminManageItems();
+
+        const savedRsvps = localStorage.getItem('showerRsvps');
+        rsvps = savedRsvps ? JSON.parse(savedRsvps) : [];
+        renderAdminRsvps();
+      }
+    }
+
+    function getDefaultWishlist() {
+      return [
+        {
+          id: 'item_1',
+          title: 'Size 1 Premium Baby Nappies',
+          description: 'Essential soft nappies for newborn days.',
+          qtyRequired: 5,
+          qtyClaimed: 1,
+          price: 220.00,
+          stores: [
+            { name: 'Takealot', url: 'https://www.takealot.com' },
+            { name: 'Checkers', url: 'https://www.checkers.co.za' }
+          ],
+          image: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400',
+          timestamp: 1000000000000,
+          claims: [{ qty: 1, giver: 'Aunt Sarah' }]
+        },
+        {
+          id: 'item_2',
+          title: 'Sensitive Baby Wipes (Pack of 12)',
+          description: 'Gentle wipes for sensitive skin.',
+          qtyRequired: 3,
+          qtyClaimed: 0,
+          price: 150.00,
+          stores: [
+            { name: 'Amazon', url: 'https://www.amazon.com' },
+            { name: 'Babycity', url: 'https://www.babycity.co.za' }
+          ],
+          image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400',
+          timestamp: 1000000001000,
+          claims: []
+        }
+      ];
+    }
+
+    // Render Wishlist Grid
+    function renderWishlist() {
+      const feed = document.getElementById('wishlistFeed');
+      if (wishlist.length === 0) {
+        feed.innerHTML = `<p class="col-span-2 text-center text-xs text-slate-400 py-8">No wishlist items added yet. Check back soon!</p>`;
+        return;
+      }
+
+      feed.innerHTML = wishlist.map((item) => {
+        const remaining = item.qtyRequired - item.qtyClaimed;
+        const isFullyClaimed = remaining <= 0;
+        const progressPct = Math.min(100, Math.round((item.qtyClaimed / item.qtyRequired) * 100));
+        const unitPrice = parseFloat(item.price) || 0;
+
+        return `
+          <div class="bg-white/90 backdrop-blur-md border border-white/80 rounded-3xl p-5 shadow-lg flex flex-col justify-between hover:shadow-xl transition relative overflow-hidden">
+            ${isFullyClaimed ? `
+              <div class="absolute top-3 right-3 bg-emerald-100 text-emerald-700 text-[11px] font-bold px-3 py-1 rounded-full border border-emerald-200">
+                <i class="fa-solid fa-circle-check"></i> Fully Claimed!
+              </div>
+            ` : `
+              <div class="absolute top-3 right-3 bg-sky-100 text-sky-700 text-[11px] font-bold px-3 py-1 rounded-full border border-sky-200">
+                ${remaining} of ${item.qtyRequired} needed
+              </div>
+            `}
+
+            <div>
+              <div class="h-36 rounded-2xl overflow-hidden bg-slate-100 mb-4 border border-slate-100">
+                <img src="${item.image || 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400'}" alt="${item.title}" class="w-full h-full object-cover">
+              </div>
+              <div class="flex justify-between items-start mb-1">
+                <h3 class="text-base font-bold text-slate-800 leading-snug">${escapeHtml(item.title)}</h3>
+                <span class="text-sm font-bold text-emerald-600 shrink-0">R${unitPrice.toFixed(2)}</span>
+              </div>
+              <p class="text-xs text-slate-500 mb-4 leading-relaxed">${escapeHtml(item.description || '')}</p>
+            </div>
+
+            <div>
+              <!-- Progress Bar -->
+              <div class="mb-4">
+                <div class="flex justify-between items-center text-[11px] font-semibold text-slate-600 mb-1">
+                  <span>Progress:</span>
+                  <span>${item.qtyClaimed} of ${item.qtyRequired} claimed</span>
+                </div>
+                <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden border border-slate-200 relative">
+                  <div class="progress-fill h-full bg-gradient-to-r from-sky-400 to-emerald-400" style="width: ${progressPct}%;"></div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2">
+                <button onclick="openClaimModal('${item.id}')" class="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition text-center flex items-center justify-center gap-1">
+                  <i class="fa-solid fa-store text-[10px] text-sky-500"></i> Store Options
+                </button>
+                
+                ${isFullyClaimed ? `
+                  <button disabled class="py-2.5 px-3 bg-slate-200 text-slate-400 text-xs font-semibold rounded-xl cursor-not-allowed text-center">
+                    Claimed!
+                  </button>
+                ` : `
+                  <button onclick="openClaimModal('${item.id}')" class="py-2.5 px-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-xl transition text-center shadow-md flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-cart-plus"></i> I Will Buy This
+                  </button>
+                `}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Modal Operations
+    function openRsvpGuideModal() {
+      document.getElementById('rsvpModal').classList.remove('hidden');
+    }
+    function closeRsvpGuideModal() {
+      document.getElementById('rsvpModal').classList.add('hidden');
+    }
+
+    function openDeliveryAddressModal() {
+      document.getElementById('deliveryAddressModal').classList.remove('hidden');
+    }
+    function closeDeliveryAddressModal() {
+      document.getElementById('deliveryAddressModal').classList.add('hidden');
+    }
+
+    function copyDeliveryAddress() {
+      const text = `Recipient: ${deliveryInfo.name}\nCell: ${deliveryInfo.cell}\nAddress: ${deliveryInfo.address}`;
+      navigator.clipboard.writeText(text);
+      alert("Delivery address copied to clipboard!");
+    }
+
+    function openClaimModal(itemId) {
+      currentClaimItemId = itemId;
+      const item = wishlist.find(i => i.id === itemId);
+      if (!item) return;
+
+      const remaining = item.qtyRequired - item.qtyClaimed;
+      document.getElementById('claimItemTitle').innerText = item.title;
+      document.getElementById('claimItemDesc').innerText = item.description || '';
+      document.getElementById('claimAvailableBadge').innerText = `${remaining} left`;
+
+      const unitPrice = parseFloat(item.price) || 0;
+      document.getElementById('claimPriceDisplay').value = `R${unitPrice.toFixed(2)}`;
+
+      // Populate multiple store links
+      const storeContainer = document.getElementById('modalStoreLinksContainer');
+      if (item.stores && item.stores.length > 0) {
+        storeContainer.innerHTML = item.stores.map(s => `
+          <a href="${s.url}" target="_blank" class="flex items-center justify-between p-3 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-xl text-xs font-semibold text-sky-800 transition">
+            <span><i class="fa-solid fa-bag-shopping mr-2 text-sky-500"></i> ${escapeHtml(s.name)}</span>
+            <span>Visit Store <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i></span>
+          </a>
+        `).join('');
+      } else {
+        storeContainer.innerHTML = `<p class="text-xs text-slate-400 italic">No specific store links provided. Check local retailers!</p>`;
+      }
+
+      const qtyInput = document.getElementById('claimQty');
+      qtyInput.max = remaining;
+      qtyInput.value = 1;
+
+      document.getElementById('claimGiverName').value = '';
+      document.getElementById('claimModal').classList.remove('hidden');
+    }
+
+    function closeClaimModal() {
+      document.getElementById('claimModal').classList.add('hidden');
+    }
+
+    function handleConfirmClaim(e) {
+      e.preventDefault();
+      const qty = parseInt(document.getElementById('claimQty').value) || 1;
+      const giver = document.getElementById('claimGiverName').value.trim() || 'Anonymous Friend';
+
+      const item = wishlist.find(i => i.id === currentClaimItemId);
+      if (!item) return;
+
+      item.qtyClaimed = (item.qtyClaimed || 0) + qty;
+      if (!item.claims) item.claims = [];
+      item.claims.push({ qty, giver, time: new Date().toLocaleDateString() });
+
+      if (itemsRef) {
+        itemsRef.child(currentClaimItemId).set(item);
+      } else {
+        localStorage.setItem('showerWishlist', JSON.stringify(wishlist));
+        renderWishlist();
+        renderAdminManageItems();
+      }
+
+      const unitPrice = parseFloat(item.price) || 0;
+      addToLocalCart(item.title, qty, unitPrice);
+
+      closeClaimModal();
+      confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+      showThankYouModal(`Your sweet decision to gift "${item.title}" means so much to us and Baby Elijah! ❤️`);
+    }
+
+    function openCashModal() {
+      document.getElementById('cashModal').classList.remove('hidden');
+    }
+    function closeCashModal() {
+      document.getElementById('cashModal').classList.add('hidden');
+    }
+
+    function copyBankingDetails() {
+      const details = `Baby Elijah Shower Banking Details:\nAccount Holder: ${bankInfo.holder}\nBank: ${bankInfo.bank}\nAccount No: ${bankInfo.acc}\nBranch Code: ${bankInfo.branch}\nRef: Elijah-Shower`;
+      navigator.clipboard.writeText(details);
+      alert("Banking details copied to clipboard!");
+    }
+
+    function confirmCashContribution() {
+      closeCashModal();
+      confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+      showThankYouModal("Thank you so much for your wonderfully thoughtful cash/EFT gift towards Elijah's future essentials! ❤️");
+    }
+
+    function showThankYouModal(msg) {
+      document.getElementById('thankYouMessageText').innerText = msg;
+      document.getElementById('thankYouModal').classList.remove('hidden');
+    }
+    function closeThankYouModal() {
+      document.getElementById('thankYouModal').classList.add('hidden');
+    }
+
+    // Local Storage Cart Tracking & Estimated Total Calculation
+    function addToLocalCart(title, qty, price) {
+      let cart = JSON.parse(localStorage.getItem('userShowerCart') || '[]');
+      const existing = cart.find(c => c.title === title);
+      if (existing) {
+        existing.qty += qty;
+      } else {
+        cart.push({ title, qty, price });
+      }
+      localStorage.setItem('userShowerCart', JSON.stringify(cart));
+      renderLocalCart();
+    }
+
+    function renderLocalCart() {
+      const cart = JSON.parse(localStorage.getItem('userShowerCart') || '[]');
+      const container = document.getElementById('cartItemsList');
+      const badge = document.getElementById('cartCountBadge');
+      const totalQtyEl = document.getElementById('cartTotalQty');
+      const totalPriceEl = document.getElementById('cartTotalPrice');
+
+      let totalQty = 0;
+      let totalPrice = 0;
+
+      if (cart.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 italic">You haven't selected any gifts on this device yet.</p>`;
+        badge.innerText = '0';
+        totalQtyEl.innerText = '0';
+        totalPriceEl.innerText = 'R0.00';
+        return;
+      }
+
+      container.innerHTML = cart.map(item => {
+        totalQty += item.qty;
+        const itemTotal = (parseFloat(item.price) || 0) * item.qty;
+        totalPrice += itemTotal;
+
+        return `
+          <div class="flex justify-between items-center bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-xs">
+            <div>
+              <span class="font-semibold text-slate-700">${escapeHtml(item.title)}</span>
+              <span class="text-[10px] text-slate-400 block">R${(parseFloat(item.price) || 0).toFixed(2)} each</span>
+            </div>
+            <div class="text-right">
+              <span class="bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full">Qty: ${item.qty}</span>
+              <span class="font-bold text-slate-700 block mt-0.5">R${itemTotal.toFixed(2)}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      badge.innerText = totalQty;
+      totalQtyEl.innerText = totalQty;
+      totalPriceEl.innerText = `R${totalPrice.toFixed(2)}`;
+    }
+
+    function clearLocalCart() {
+      localStorage.removeItem('userShowerCart');
+      renderLocalCart();
+    }
+
+    function scrollToCart() {
+      document.getElementById('cartSummarySection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // RSVP Form Submission
+    function handleRsvpSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('rsvpName').value.trim();
+      const status = document.getElementById('rsvpStatus').value;
+      const guests = parseInt(document.getElementById('rsvpGuests').value) || 1;
+
+      const rsvpData = { name, status, guests, timestamp: Date.now(), date: new Date().toLocaleDateString() };
+
+      if (rsvpsRef) {
+        rsvpsRef.push(rsvpData);
+      } else {
+        rsvps.unshift(rsvpData);
+        localStorage.setItem('showerRsvps', JSON.stringify(rsvps));
+        renderAdminRsvps();
+      }
+
+      closeRsvpGuideModal();
+      confetti({ particleCount: 60, spread: 50, origin: { y: 0.6 } });
+      showThankYouModal(`Thank you ${name}! Your RSVP has been recorded. We can't wait to see you!`);
+    }
+
+    // Admin Operations
+    function toggleAdminModal() {
+      const modal = document.getElementById('adminModal');
+      modal.classList.toggle('hidden');
+      if (!modal.classList.contains('hidden')) {
+        document.getElementById('adminPinView').classList.remove('hidden');
+        document.getElementById('adminControlsView').classList.add('hidden');
+        document.getElementById('adminPinInput').value = '';
+        document.getElementById('adminPinError').classList.add('hidden');
+      }
+    }
+
+    function verifyAdminPin() {
+      const enteredPin = document.getElementById('adminPinInput').value;
+      if (enteredPin === adminPin) {
+        document.getElementById('adminPinView').classList.add('hidden');
+        document.getElementById('adminControlsView').classList.remove('hidden');
+        renderAdminManageItems();
+        renderAdminPurchases();
+      } else {
+        document.getElementById('adminPinError').classList.remove('hidden');
+      }
+    }
+
+    function switchAdminTab(tabName) {
+      ['wishlist', 'manageItems', 'deliverySetup', 'rsvps', 'purchases'].forEach(t => {
+        const el = document.getElementById(`adminTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        const btn = document.getElementById(`tabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        if (el) el.classList.add('hidden');
+        if (btn) btn.className = 'py-2 px-4 text-xs md:text-sm font-bold text-slate-400 whitespace-nowrap';
+      });
+
+      const activeTabEl = document.getElementById(`adminTab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
+      const activeBtnEl = document.getElementById(`tabBtn${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
+      if (activeTabEl) activeTabEl.classList.remove('hidden');
+      if (activeBtnEl) activeBtnEl.className = 'py-2 px-4 text-xs md:text-sm font-bold border-b-2 border-sky-500 text-sky-600 whitespace-nowrap';
+    }
+
+    function handleAdminAddItem(e) {
+      e.preventDefault();
+      const title = document.getElementById('admTitle').value.trim();
+      const qtyRequired = parseInt(document.getElementById('admQty').value) || 1;
+      const price = parseFloat(document.getElementById('admPrice').value) || 0;
+      const image = document.getElementById('admImage').value.trim();
+
+      // Collect multiple store links
+      let stores = [];
+      for (let i = 1; i <= 4; i++) {
+        const sName = document.getElementById(`admStore${i}Name`).value.trim();
+        const sLink = document.getElementById(`admStore${i}Link`).value.trim();
+        if (sName && sLink) {
+          stores.push({ name: sName, url: sLink });
+        }
+      }
+
+      const newItem = {
+        id: 'item_' + Date.now(),
+        title,
+        description: `Quantity requested: ${qtyRequired}`,
+        qtyRequired,
+        qtyClaimed: 0,
+        price,
+        stores,
+        image: image || 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400',
+        timestamp: Date.now(),
+        claims: []
+      };
+
+      if (itemsRef) {
+        itemsRef.child(newItem.id).set(newItem);
+      } else {
+        wishlist.push(newItem);
+        localStorage.setItem('showerWishlist', JSON.stringify(wishlist));
+        renderWishlist();
+        renderAdminManageItems();
+      }
+
+      document.getElementById('admTitle').value = '';
+      document.getElementById('admPrice').value = '250.00';
+      document.getElementById('admImage').value = '';
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`admStore${i}Name`).value = '';
+        document.getElementById(`admStore${i}Link`).value = '';
+      }
+      alert('Wishlist item added successfully with store options!');
+    }
+
+    function renderAdminManageItems() {
+      const container = document.getElementById('adminManageItemList');
+      document.getElementById('totalItemsBadge').innerText = wishlist.length;
+
+      if (wishlist.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 italic">No items in the registry to manage.</p>`;
+        return;
+      }
+
+      container.innerHTML = wishlist.map((item) => `
+        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs flex justify-between items-center gap-2">
+          <div class="flex items-center gap-3 overflow-hidden">
+            <img src="${item.image || 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400'}" class="w-10 h-10 rounded-lg object-cover border border-slate-200 shrink-0">
+            <div class="truncate">
+              <p class="font-bold text-slate-800 truncate">${escapeHtml(item.title)} - R${(parseFloat(item.price)||0).toFixed(2)}</p>
+              <p class="text-[11px] text-slate-500">${item.qtyClaimed} of ${item.qtyRequired} claimed</p>
+            </div>
+          </div>
+          <button onclick="deleteRegistryItem('${item.id}')" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg font-bold text-xs transition shrink-0 flex items-center gap-1">
+            <i class="fa-solid fa-trash text-[10px]"></i> Delete
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function deleteRegistryItem(itemId) {
+      if (!confirm("Are you sure you want to delete this item from the registry?")) return;
+
+      if (itemsRef) {
+        itemsRef.child(itemId).remove();
+      } else {
+        wishlist = wishlist.filter(i => i.id !== itemId);
+        localStorage.setItem('showerWishlist', JSON.stringify(wishlist));
+        renderWishlist();
+        renderAdminManageItems();
+      }
+    }
+
+    function saveAdminDeliveryInfo() {
+      deliveryInfo.name = document.getElementById('admRecipientName').value.trim();
+      deliveryInfo.cell = document.getElementById('admRecipientCell').value.trim();
+      deliveryInfo.address = document.getElementById('admDeliveryAddress').value.trim();
+      deliveryInfo.mapsUrl = document.getElementById('admGoogleMapsUrl').value.trim();
+
+      localStorage.setItem('showerDelivery', JSON.stringify(deliveryInfo));
+      applyDeliveryInfoToUI();
+      alert('Delivery details successfully updated!');
+    }
+
+    function saveAdminBankDetails() {
+      bankInfo.holder = document.getElementById('admBankHolder').value;
+      bankInfo.bank = document.getElementById('admBankName').value;
+      bankInfo.acc = document.getElementById('admBankAcc').value;
+      bankInfo.branch = document.getElementById('admBankBranch').value;
+
+      localStorage.setItem('showerBank', JSON.stringify(bankInfo));
+      applyBankInfoToUI();
+      alert('Banking details saved!');
+    }
+
+    function renderAdminRsvps() {
+      const container = document.getElementById('adminRsvpList');
+      document.getElementById('rsvpCountBadge').innerText = rsvps.length;
+
+      if (rsvps.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 italic">No RSVPs recorded yet.</p>`;
+        return;
+      }
+
+      container.innerHTML = rsvps.map(r => `
+        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs flex justify-between items-center">
+          <div>
+            <span class="font-bold text-slate-800">${escapeHtml(r.name)}</span>
+            <p class="text-[11px] text-slate-500">${r.status} (${r.guests} guests)</p>
+          </div>
+          <span class="text-[10px] text-slate-400">${r.date || ''}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderAdminPurchases() {
+      const container = document.getElementById('adminPurchasesList');
+      const claimedItems = wishlist.filter(i => i.qtyClaimed > 0);
+
+      if (claimedItems.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 italic">No items claimed yet.</p>`;
+        return;
+      }
+
+      container.innerHTML = claimedItems.map(item => `
+        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1">
+          <div class="flex justify-between font-bold text-slate-800">
+            <span>${escapeHtml(item.title)}</span>
+            <span class="text-emerald-600">${item.qtyClaimed} of ${item.qtyRequired} claimed</span>
+          </div>
+          <div class="text-[11px] text-slate-500">
+            <strong>Givers:</strong> ${item.claims ? item.claims.map(c => `${c.giver} (${c.qty})`).join(', ') : 'Anonymous'}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+  </script>
+</body>
+</html>
