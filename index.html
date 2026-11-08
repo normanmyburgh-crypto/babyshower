@@ -641,7 +641,6 @@
             val.id = child.key;
             wishlist.push(val);
           });
-          wishlist.sort((a, b) => a.timestamp - b.timestamp);
           renderWishlist();
           renderAdminManageItems();
         });
@@ -1110,7 +1109,6 @@
       }
 
       const newItem = {
-        id: 'item_' + Date.now(),
         title,
         description: `Quantity requested: ${qtyRequired}`,
         qtyRequired,
@@ -1123,8 +1121,12 @@
       };
 
       if (itemsRef) {
-        itemsRef.child(newItem.id).set(newItem);
+        // Generate a unique Firebase push key so the item saves correctly and syncs to homepage
+        const newRef = itemsRef.push();
+        newItem.id = newRef.key;
+        newRef.set(newItem);
       } else {
+        newItem.id = 'item_' + Date.now();
         wishlist.push(newItem);
         localStorage.setItem('showerWishlist', JSON.stringify(wishlist));
         renderWishlist();
