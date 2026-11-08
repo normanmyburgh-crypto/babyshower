@@ -10,7 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Google Fonts matching the Gender Reveal Site Theme -->
+  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
   
   <!-- Firebase SDKs for Live Cross-Device Sync -->
@@ -146,8 +146,8 @@
 
   </div>
 
-  <!-- Welcome / Attendance RSVP & Guide Modal -->
-  <div id="rsvpModal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+  <!-- Welcome / Attendance RSVP & Guide Modal (Opens automatically on load) -->
+  <div id="rsvpModal" class="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
     <div class="bg-white border border-slate-100 rounded-3xl w-full max-w-lg p-6 md:p-8 relative shadow-2xl text-left max-h-[90vh] overflow-y-auto">
       <button onclick="closeRsvpGuideModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
         <i class="fa-solid fa-xmark text-xl"></i>
@@ -168,11 +168,11 @@
         </p>
         <div class="flex items-start gap-2">
           <span class="bg-sky-200 text-sky-800 rounded-full w-5 h-5 flex items-center justify-center font-bold text-[10px] shrink-0">1</span>
-          <p>Browse the wishlist items below. Click to view store options (Amazon, Takealot, Checkers, Babycity, etc.).</p>
+          <p>Browse wishlist items. Compare prices across different online stores (Takealot, Amazon, Checkers, etc.).</p>
         </div>
         <div class="flex items-start gap-2">
           <span class="bg-sky-200 text-sky-800 rounded-full w-5 h-5 flex items-center justify-center font-bold text-[10px] shrink-0">2</span>
-          <p>Click <strong>"I Will Buy This"</strong> to claim an item. If you cannot attend, check our Delivery Address button for home delivery options!</p>
+          <p>Click <strong>"Store Options & Claim"</strong> to select your preferred store, view its specific price, and add it to your gift summary!</p>
         </div>
       </div>
 
@@ -199,7 +199,7 @@
         </div>
 
         <button type="submit" class="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-xl transition shadow-md">
-          Save RSVP & Continue
+          Save RSVP & Continue to Registry
         </button>
       </form>
     </div>
@@ -246,7 +246,7 @@
     </div>
   </div>
 
-  <!-- Item Store Links & Claiming Modal -->
+  <!-- Multi-Store Price Selection & Claiming Modal -->
   <div id="claimModal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
     <div class="bg-white border border-slate-100 rounded-3xl w-full max-w-lg p-6 md:p-8 relative shadow-2xl text-left max-h-[90vh] overflow-y-auto">
       <button onclick="closeClaimModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
@@ -254,45 +254,45 @@
       </button>
 
       <div class="mb-4">
-        <span class="bg-amber-100 text-amber-700 text-xs px-2.5 py-1 rounded-full font-semibold">Gift Selection & Store Options</span>
+        <span class="bg-amber-100 text-amber-700 text-xs px-2.5 py-1 rounded-full font-semibold">Store Options & Pricing</span>
         <h3 id="claimItemTitle" class="text-xl font-bold text-slate-800 mt-2">Item Title</h3>
-        <p id="claimItemDesc" class="text-xs text-slate-500 mt-1">Item Description</p>
+        <p id="claimItemDesc" class="text-xs text-slate-500 mt-1">Select your preferred online store below to view and buy at that store's price:</p>
       </div>
 
-      <!-- Multiple Store Links Option List -->
-      <div class="mb-5">
-        <label class="block text-xs font-semibold text-slate-600 mb-2">Choose preferred store option to view/purchase:</label>
-        <div id="modalStoreLinksContainer" class="space-y-2">
-          <!-- Dynamically populated store links -->
-        </div>
+      <!-- Multiple Store Options List with Individual Prices -->
+      <div class="mb-5 space-y-2.5" id="modalStoreLinksContainer">
+        <!-- Dynamically populated store buttons with prices -->
       </div>
 
       <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl mb-4 text-xs flex justify-between items-center">
-        <span>Available remaining:</span>
+        <span>Available remaining quantity:</span>
         <span id="claimAvailableBadge" class="font-bold text-sky-600 text-sm">0 left</span>
       </div>
 
-      <form onsubmit="handleConfirmClaim(event)" class="space-y-4">
+      <form onsubmit="handleConfirmClaim(event)" class="space-y-4 border-t border-slate-100 pt-4">
+        <input type="hidden" id="selectedStoreName" value="">
+        <input type="hidden" id="selectedStorePrice" value="0">
+        <input type="hidden" id="selectedStoreUrl" value="">
+
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">Quantity to buy</label>
-            <input type="number" id="claimQty" min="1" value="1" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-sky-500">
+            <input type="number" id="claimQty" min="1" value="1" required class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-sky-500">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Estimated Unit Price (R)</label>
-            <input type="text" id="claimPriceDisplay" readonly class="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm font-bold text-emerald-600" value="R0.00">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Chosen Store & Price</label>
+            <input type="text" id="claimStorePriceDisplay" readonly class="w-full px-4 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-emerald-600 truncate" value="Select store above">
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Your Name (Optional)</label>
-          <input type="text" id="claimGiverName" placeholder="Leave blank if you'd prefer to stay anonymous" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-sky-500">
-          <span class="text-[11px] text-slate-400 mt-1 block">You can leave this blank if you'd rather not say who bought it!</span>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Your Name / Family Name (Optional)</label>
+          <input type="text" id="claimGiverName" placeholder="Leave blank to stay anonymous" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-sky-500">
         </div>
 
-        <div class="pt-2">
-          <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-sm rounded-xl transition shadow-md flex items-center justify-center gap-2">
-            <i class="fa-solid fa-gift"></i> Confirm & Add to My Selected Gifts
+        <div>
+          <button type="submit" id="confirmClaimBtn" disabled class="w-full py-3 bg-slate-300 text-slate-500 font-bold text-xs rounded-xl transition cursor-not-allowed">
+            Select a Store Above First
           </button>
         </div>
       </form>
@@ -440,52 +440,51 @@
           <button onclick="switchAdminTab('purchases')" id="tabBtnPurchases" class="py-2 px-4 text-xs md:text-sm font-bold text-slate-400 whitespace-nowrap">Purchased Tracker</button>
         </div>
 
-        <!-- Tab 1: Wishlist Submission with Multi-Links & Price -->
+        <!-- Tab 1: Wishlist Submission & Editing Form -->
         <div id="adminTabWishlist" class="space-y-4">
-          <h4 class="font-bold text-sm text-slate-800">Add New Wishlist Item (with Multiple Store Links & Price):</h4>
-          <form onsubmit="handleAdminAddItem(event)" class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <div class="flex justify-between items-center">
+            <h4 id="formHeaderTitle" class="font-bold text-sm text-slate-800">Add New Wishlist Item (with Multiple Stores & Prices):</h4>
+            <button type="button" id="cancelEditBtn" onclick="resetWishlistForm()" class="hidden text-xs text-rose-500 hover:underline font-semibold">Cancel Edit</button>
+          </div>
+
+          <form onsubmit="handleAdminSaveItem(event)" class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+            <input type="hidden" id="editItemId" value="">
+            
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">Item Title *</label>
               <input type="text" id="admTitle" required placeholder="e.g. Baby Stroller / Nappies" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs">
             </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Quantity Required *</label>
-                <input type="number" id="admQty" min="1" value="1" required class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Listing Price (R) *</label>
-                <input type="number" id="admPrice" min="0" step="0.01" value="250.00" required class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs">
-              </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Quantity Required *</label>
+              <input type="number" id="admQty" min="1" value="1" required class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">Item Image URL (Optional)</label>
               <input type="text" id="admImage" placeholder="https://..." class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs">
             </div>
 
-            <!-- Multiple Store Links Setup -->
+            <!-- Multiple Store Links & Individual Prices Setup -->
             <div class="border-t border-slate-200 pt-3 space-y-2">
-              <label class="block text-xs font-bold text-slate-700">Multiple Store Links (Amazon, Takealot, Checkers, Babycity, etc.):</label>
+              <label class="block text-xs font-bold text-slate-700">Store Options, URLs & Specific Prices:</label>
               
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <input type="text" id="admStore1Name" placeholder="Store 1 Name (e.g. Takealot)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
-                <input type="text" id="admStore1Link" placeholder="Store 1 URL (https://...)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
+                <input type="number" id="admStore1Price" min="0" step="0.01" placeholder="Price (R)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
+                <input type="text" id="admStore1Link" placeholder="Store 1 URL (https://...)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs md:col-span-3">
               </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2 pt-2 border-t border-slate-100">
                 <input type="text" id="admStore2Name" placeholder="Store 2 Name (e.g. Amazon)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
-                <input type="text" id="admStore2Link" placeholder="Store 2 URL (https://...)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
+                <input type="number" id="admStore2Price" min="0" step="0.01" placeholder="Price (R)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
+                <input type="text" id="admStore2Link" placeholder="Store 2 URL (https://...)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs md:col-span-3">
               </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2 pt-2 border-t border-slate-100">
                 <input type="text" id="admStore3Name" placeholder="Store 3 Name (e.g. Checkers)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
-                <input type="text" id="admStore3Link" placeholder="Store 3 URL (https://...)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <input type="text" id="admStore4Name" placeholder="Store 4 Name (e.g. Babycity)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
-                <input type="text" id="admStore4Link" placeholder="Store 4 URL (https://...)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
+                <input type="number" id="admStore3Price" min="0" step="0.01" placeholder="Price (R)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
+                <input type="text" id="admStore3Link" placeholder="Store 3 URL (https://...)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs md:col-span-3">
               </div>
             </div>
 
-            <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl transition mt-2">+ Add Item To Registry</button>
+            <button type="submit" id="saveItemFormBtn" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl transition mt-2">+ Add Item To Registry</button>
           </form>
 
           <!-- Banking Details Setup -->
@@ -500,9 +499,9 @@
           </div>
         </div>
 
-        <!-- Tab 2: Manage & Delete Registry Items -->
+        <!-- Tab 2: Manage, Edit & Delete Registry Items -->
         <div id="adminTabManageItems" class="hidden space-y-3">
-          <h4 class="font-bold text-sm text-slate-800">Active Registry Items (Click Delete to remove):</h4>
+          <h4 class="font-bold text-sm text-slate-800">Active Registry Items (Edit or Delete):</h4>
           <div id="adminManageItemList" class="space-y-2 max-h-72 overflow-y-auto pr-1">
             <!-- Dynamically populated management item list -->
           </div>
@@ -542,8 +541,8 @@
 
         <!-- Tab 5: Purchased Tracker -->
         <div id="adminTabPurchases" class="hidden space-y-3">
-          <h4 class="font-bold text-sm text-slate-800">Items Fully or Partially Claimed:</h4>
-          <div id="adminPurchasesList" class="space-y-2 max-h-60 overflow-y-auto">
+          <h4 class="font-bold text-sm text-slate-800">Items Fully or Partially Claimed (Delete a claim to restore item count):</h4>
+          <div id="adminPurchasesList" class="space-y-2 max-h-72 overflow-y-auto pr-1">
             <!-- Dynamically populated purchases -->
           </div>
         </div>
@@ -625,7 +624,6 @@
       document.getElementById('displayDeliveryAddress').innerText = deliveryInfo.address;
       document.getElementById('googleMapsLink').href = deliveryInfo.mapsUrl;
 
-      // Admin inputs populate
       document.getElementById('admRecipientName').value = deliveryInfo.name;
       document.getElementById('admRecipientCell').value = deliveryInfo.cell;
       document.getElementById('admDeliveryAddress').value = deliveryInfo.address;
@@ -643,6 +641,7 @@
           });
           renderWishlist();
           renderAdminManageItems();
+          renderAdminPurchases();
         });
 
         rsvpsRef.on('value', (snapshot) => {
@@ -657,6 +656,7 @@
         wishlist = savedWish ? JSON.parse(savedWish) : getDefaultWishlist();
         renderWishlist();
         renderAdminManageItems();
+        renderAdminPurchases();
 
         const savedRsvps = localStorage.getItem('showerRsvps');
         rsvps = savedRsvps ? JSON.parse(savedRsvps) : [];
@@ -672,31 +672,27 @@
           description: 'Essential soft nappies for newborn days.',
           qtyRequired: 5,
           qtyClaimed: 1,
-          price: 220.00,
           stores: [
-            { name: 'Takealot', url: 'https://www.takealot.com' },
-            { name: 'Checkers', url: 'https://www.checkers.co.za' }
+            { name: 'Takealot', price: 219.00, url: 'https://www.takealot.com' },
+            { name: 'Checkers', price: 239.00, url: 'https://www.checkers.co.za' }
           ],
           image: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400',
           timestamp: 1000000000000,
-          claims: [{ qty: 1, giver: 'Aunt Sarah' }]
-        },
-        {
-          id: 'item_2',
-          title: 'Sensitive Baby Wipes (Pack of 12)',
-          description: 'Gentle wipes for sensitive skin.',
-          qtyRequired: 3,
-          qtyClaimed: 0,
-          price: 150.00,
-          stores: [
-            { name: 'Amazon', url: 'https://www.amazon.com' },
-            { name: 'Babycity', url: 'https://www.babycity.co.za' }
-          ],
-          image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400',
-          timestamp: 1000000001000,
-          claims: []
+          claims: [{ id: 'claim_1', qty: 1, giver: 'Aunt Sarah', store: 'Takealot', price: 219.00 }]
         }
       ];
+    }
+
+    function getItemPriceRange(item) {
+      if (!item.stores || item.stores.length === 0) return 'Price TBD';
+      const prices = item.stores.map(s => parseFloat(s.price) || 0).filter(p => p > 0);
+      if (prices.length === 0) return 'Price TBD';
+      const min = Math.min(...prices);
+      const max = Math.max(...prices);
+      if (min === max) {
+        return `R${min.toFixed(2)}`;
+      }
+      return `R${min.toFixed(2)} – R${max.toFixed(2)}`;
     }
 
     // Render Wishlist Grid
@@ -711,7 +707,7 @@
         const remaining = item.qtyRequired - item.qtyClaimed;
         const isFullyClaimed = remaining <= 0;
         const progressPct = Math.min(100, Math.round((item.qtyClaimed / item.qtyRequired) * 100));
-        const unitPrice = parseFloat(item.price) || 0;
+        const priceDisplay = getItemPriceRange(item);
 
         return `
           <div class="bg-white/90 backdrop-blur-md border border-white/80 rounded-3xl p-5 shadow-lg flex flex-col justify-between hover:shadow-xl transition relative overflow-hidden">
@@ -731,9 +727,9 @@
               </div>
               <div class="flex justify-between items-start mb-1">
                 <h3 class="text-base font-bold text-slate-800 leading-snug">${escapeHtml(item.title)}</h3>
-                <span class="text-sm font-bold text-emerald-600 shrink-0">R${unitPrice.toFixed(2)}</span>
+                <span class="text-sm font-bold text-emerald-600 shrink-0">${priceDisplay}</span>
               </div>
-              <p class="text-xs text-slate-500 mb-4 leading-relaxed">${escapeHtml(item.description || '')}</p>
+              <p class="text-xs text-slate-500 mb-4 leading-relaxed">Compare prices across stores below and select your preferred option!</p>
             </div>
 
             <div>
@@ -748,18 +744,14 @@
                 </div>
               </div>
 
-              <div class="grid grid-cols-2 gap-2">
-                <button onclick="openClaimModal('${item.id}')" class="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition text-center flex items-center justify-center gap-1">
-                  <i class="fa-solid fa-store text-[10px] text-sky-500"></i> Store Options
-                </button>
-                
+              <div>
                 ${isFullyClaimed ? `
-                  <button disabled class="py-2.5 px-3 bg-slate-200 text-slate-400 text-xs font-semibold rounded-xl cursor-not-allowed text-center">
-                    Claimed!
+                  <button disabled class="w-full py-2.5 px-3 bg-slate-200 text-slate-400 text-xs font-semibold rounded-xl cursor-not-allowed text-center">
+                    All Claimed!
                   </button>
                 ` : `
-                  <button onclick="openClaimModal('${item.id}')" class="py-2.5 px-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-xl transition text-center shadow-md flex items-center justify-center gap-1">
-                    <i class="fa-solid fa-cart-plus"></i> I Will Buy This
+                  <button onclick="openClaimModal('${item.id}')" class="w-full py-2.5 px-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-xl transition text-center shadow-md flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-store"></i> Store Options & Claim
                   </button>
                 `}
               </div>
@@ -797,30 +789,55 @@
 
       const remaining = item.qtyRequired - item.qtyClaimed;
       document.getElementById('claimItemTitle').innerText = item.title;
-      document.getElementById('claimItemDesc').innerText = item.description || '';
       document.getElementById('claimAvailableBadge').innerText = `${remaining} left`;
 
-      const unitPrice = parseFloat(item.price) || 0;
-      document.getElementById('claimPriceDisplay').value = `R${unitPrice.toFixed(2)}`;
+      document.getElementById('selectedStoreName').value = '';
+      document.getElementById('selectedStorePrice').value = '0';
+      document.getElementById('selectedStoreUrl').value = '';
+      document.getElementById('claimStorePriceDisplay').value = 'Select store above';
+      const confirmBtn = document.getElementById('confirmClaimBtn');
+      confirmBtn.disabled = true;
+      confirmBtn.className = 'w-full py-3 bg-slate-300 text-slate-500 font-bold text-xs rounded-xl transition cursor-not-allowed';
 
       const storeContainer = document.getElementById('modalStoreLinksContainer');
       if (item.stores && item.stores.length > 0) {
-        storeContainer.innerHTML = item.stores.map(s => `
-          <a href="${s.url}" target="_blank" class="flex items-center justify-between p-3 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-xl text-xs font-semibold text-sky-800 transition">
-            <span><i class="fa-solid fa-bag-shopping mr-2 text-sky-500"></i> ${escapeHtml(s.name)}</span>
-            <span>Visit Store <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i></span>
-          </a>
+        storeContainer.innerHTML = item.stores.map((s, idx) => `
+          <div class="flex items-center justify-between p-3 bg-slate-50 hover:bg-sky-50 border border-slate-200 rounded-xl text-xs transition">
+            <div>
+              <span class="font-bold text-slate-800 block">${escapeHtml(s.name)}</span>
+              <span class="font-bold text-emerald-600">R${(parseFloat(s.price) || 0).toFixed(2)}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <a href="${s.url}" target="_blank" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg text-[11px] transition" title="Visit Store Website">
+                Visit <i class="fa-solid fa-arrow-up-right-from-square ml-0.5 text-[9px]"></i>
+              </a>
+              <button type="button" onclick="selectStoreForClaim('${escapeHtml(s.name)}', ${parseFloat(s.price) || 0}, '${s.url}')" class="px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg text-[11px] transition shadow-sm">
+                Select This Store
+              </button>
+            </div>
+          </div>
         `).join('');
       } else {
-        storeContainer.innerHTML = `<p class="text-xs text-slate-400 italic">No specific store links provided. Check local retailers!</p>`;
+        storeContainer.innerHTML = `<p class="text-xs text-slate-400 italic">No specific store links provided.</p>`;
       }
 
       const qtyInput = document.getElementById('claimQty');
       qtyInput.max = remaining;
       qtyInput.value = 1;
-
       document.getElementById('claimGiverName').value = '';
+
       document.getElementById('claimModal').classList.remove('hidden');
+    }
+
+    function selectStoreForClaim(storeName, storePrice, storeUrl) {
+      document.getElementById('selectedStoreName').value = storeName;
+      document.getElementById('selectedStorePrice').value = storePrice;
+      document.getElementById('selectedStoreUrl').value = storeUrl;
+      document.getElementById('claimStorePriceDisplay').value = `${storeName} (R${storePrice.toFixed(2)})`;
+
+      const confirmBtn = document.getElementById('confirmClaimBtn');
+      confirmBtn.disabled = false;
+      confirmBtn.className = 'w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-sm rounded-xl transition shadow-md';
     }
 
     function closeClaimModal() {
@@ -831,13 +848,16 @@
       e.preventDefault();
       const qty = parseInt(document.getElementById('claimQty').value) || 1;
       const giver = document.getElementById('claimGiverName').value.trim() || 'Anonymous Friend';
+      const storeName = document.getElementById('selectedStoreName').value;
+      const storePrice = parseFloat(document.getElementById('selectedStorePrice').value) || 0;
 
       const item = wishlist.find(i => i.id === currentClaimItemId);
-      if (!item) return;
+      if (!item || !storeName) return;
 
       item.qtyClaimed = (item.qtyClaimed || 0) + qty;
       if (!item.claims) item.claims = [];
-      item.claims.push({ qty, giver, time: new Date().toLocaleDateString() });
+      const claimId = 'claim_' + Date.now();
+      item.claims.push({ id: claimId, qty, giver, store: storeName, price: storePrice, time: new Date().toLocaleDateString() });
 
       if (itemsRef) {
         itemsRef.child(currentClaimItemId).set(item);
@@ -845,14 +865,14 @@
         localStorage.setItem('showerWishlist', JSON.stringify(wishlist));
         renderWishlist();
         renderAdminManageItems();
+        renderAdminPurchases();
       }
 
-      const unitPrice = parseFloat(item.price) || 0;
-      addToLocalCart(item.title, qty, unitPrice, item.id);
+      addToLocalCart(item.title, qty, storePrice, item.id, storeName);
 
       closeClaimModal();
       confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
-      showThankYouModal(`Your sweet decision to gift "${item.title}" means so much to us and Baby Elijah! ❤️`);
+      showThankYouModal(`Your sweet gift selection of "${item.title}" via ${storeName} has been recorded! ❤️`);
     }
 
     // Bulk Checkout Modal Functions
@@ -871,7 +891,10 @@
         totalPrice += itemTotal;
         return `
           <div class="flex justify-between items-center bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-xs">
-            <span class="font-semibold text-slate-700">${escapeHtml(item.title)} (x${item.qty})</span>
+            <div>
+              <span class="font-semibold text-slate-700">${escapeHtml(item.title)} (x${item.qty})</span>
+              <span class="text-[10px] text-sky-600 block">Via ${escapeHtml(item.store || 'Store')}</span>
+            </div>
             <span class="font-bold text-emerald-600">R${itemTotal.toFixed(2)}</span>
           </div>
         `;
@@ -895,12 +918,12 @@
       cart.forEach(item => {
         const itemTotal = (parseFloat(item.price) || 0) * item.qty;
         totalPrice += itemTotal;
-        text += `- ${item.title} (Qty: ${item.qty}) - R${itemTotal.toFixed(2)}\n`;
+        text += `- ${item.title} (Qty: ${item.qty} via ${item.store}) - R${itemTotal.toFixed(2)}\n`;
       });
       text += `Total Estimated Cost: R${totalPrice.toFixed(2)}`;
 
       navigator.clipboard.writeText(text);
-      alert("Checkout summary copied to clipboard! You can now paste and send it via WhatsApp.");
+      alert("Checkout summary copied to clipboard! You can now share it via WhatsApp.");
     }
 
     function handleBulkCheckoutSubmit(e) {
@@ -915,7 +938,8 @@
         if (item) {
           item.qtyClaimed = (item.qtyClaimed || 0) + cartItem.qty;
           if (!item.claims) item.claims = [];
-          item.claims.push({ qty: cartItem.qty, giver: giverName, time: new Date().toLocaleDateString() });
+          const claimId = 'claim_' + Date.now() + Math.random().toString(36).substring(2, 5);
+          item.claims.push({ id: claimId, qty: cartItem.qty, giver: giverName, store: cartItem.store, price: cartItem.price, time: new Date().toLocaleDateString() });
 
           if (itemsRef && item.id && !item.id.startsWith('item_')) {
             itemsRef.child(item.id).set(item);
@@ -931,6 +955,7 @@
         localStorage.setItem('showerWishlist', JSON.stringify(wishlist));
         renderWishlist();
         renderAdminManageItems();
+        renderAdminPurchases();
       }
 
       localStorage.removeItem('userShowerCart');
@@ -938,7 +963,7 @@
       closeBulkCheckoutModal();
 
       confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-      showThankYouModal(`Thank you so much ${giverName}! All your selected gifts have been successfully checked out and recorded for Baby Elijah! ❤️`);
+      showThankYouModal(`Thank you so much ${giverName}! All your selected gifts have been successfully checked out and recorded! ❤️`);
     }
 
     function openCashModal() {
@@ -968,14 +993,14 @@
       document.getElementById('thankYouModal').classList.add('hidden');
     }
 
-    // Local Storage Cart Tracking & Estimated Total Calculation
-    function addToLocalCart(title, qty, price, id) {
+    // Local Storage Cart Tracking
+    function addToLocalCart(title, qty, price, id, store) {
       let cart = JSON.parse(localStorage.getItem('userShowerCart') || '[]');
-      const existing = cart.find(c => c.title === title);
+      const existing = cart.find(c => c.title === title && c.store === store);
       if (existing) {
         existing.qty += qty;
       } else {
-        cart.push({ title, qty, price, id });
+        cart.push({ title, qty, price, id, store });
       }
       localStorage.setItem('userShowerCart', JSON.stringify(cart));
       renderLocalCart();
@@ -1008,7 +1033,7 @@
           <div class="flex justify-between items-center bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-xs">
             <div>
               <span class="font-semibold text-slate-700">${escapeHtml(item.title)}</span>
-              <span class="text-[10px] text-slate-400 block">R${(parseFloat(item.price) || 0).toFixed(2)} each</span>
+              <span class="text-[10px] text-sky-600 block">Via ${escapeHtml(item.store)} (R${(parseFloat(item.price)||0).toFixed(2)} each)</span>
             </div>
             <div class="text-right">
               <span class="bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full">Qty: ${item.qty}</span>
@@ -1051,7 +1076,7 @@
 
       closeRsvpGuideModal();
       confetti({ particleCount: 60, spread: 50, origin: { y: 0.6 } });
-      showThankYouModal(`Thank you ${name}! Your RSVP has been recorded. We can't wait to see you!`);
+      showThankYouModal(`Thank you ${name}! Your RSVP has been recorded. Welcome to Baby Elijah's Registry!`);
     }
 
     // Admin Operations
@@ -1092,55 +1117,121 @@
       if (activeBtnEl) activeBtnEl.className = 'py-2 px-4 text-xs md:text-sm font-bold border-b-2 border-sky-500 text-sky-600 whitespace-nowrap';
     }
 
-    function handleAdminAddItem(e) {
+    // --- ADD OR EDIT WISHLIST ITEM ---
+    function handleAdminSaveItem(e) {
       e.preventDefault();
+      const editId = document.getElementById('editItemId').value;
       const title = document.getElementById('admTitle').value.trim();
       const qtyRequired = parseInt(document.getElementById('admQty').value) || 1;
-      const price = parseFloat(document.getElementById('admPrice').value) || 0;
       const image = document.getElementById('admImage').value.trim();
 
       let stores = [];
-      for (let i = 1; i <= 4; i++) {
+      for (let i = 1; i <= 3; i++) {
         const sName = document.getElementById(`admStore${i}Name`).value.trim();
+        const sPrice = parseFloat(document.getElementById(`admStore${i}Price`).value) || 0;
         const sLink = document.getElementById(`admStore${i}Link`).value.trim();
-        if (sName && sLink) {
-          stores.push({ name: sName, url: sLink });
+        if (sName && sPrice > 0) {
+          stores.push({ name: sName, price: sPrice, url: sLink || '#' });
         }
       }
 
-      const newItem = {
-        title,
-        description: `Quantity requested: ${qtyRequired}`,
-        qtyRequired,
-        qtyClaimed: 0,
-        price,
-        stores,
-        image: image || 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400',
-        timestamp: Date.now(),
-        claims: []
-      };
+      if (editId) {
+        // Editing existing item
+        const existingItem = wishlist.find(i => i.id === editId);
+        if (existingItem) {
+          existingItem.title = title;
+          existingItem.qtyRequired = qtyRequired;
+          existingItem.image = image || existingItem.image;
+          existingItem.stores = stores;
 
-      if (itemsRef) {
-        // Generate a unique Firebase push key so the item saves correctly and syncs to homepage
-        const newRef = itemsRef.push();
-        newItem.id = newRef.key;
-        newRef.set(newItem);
+          if (itemsRef) {
+            itemsRef.child(editId).set(existingItem);
+          } else {
+            localStorage.setItem('showerWishlist', JSON.stringify(wishlist));
+          }
+          alert('Wishlist item successfully updated!');
+        }
       } else {
-        newItem.id = 'item_' + Date.now();
-        wishlist.push(newItem);
-        localStorage.setItem('showerWishlist', JSON.stringify(wishlist));
-        renderWishlist();
-        renderAdminManageItems();
+        // Adding new item
+        const newItem = {
+          title,
+          description: `Quantity requested: ${qtyRequired}`,
+          qtyRequired,
+          qtyClaimed: 0,
+          stores,
+          image: image || 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400',
+          timestamp: Date.now(),
+          claims: []
+        };
+
+        if (itemsRef) {
+          const newRef = itemsRef.push();
+          newItem.id = newRef.key;
+          newRef.set(newItem);
+        } else {
+          newItem.id = 'item_' + Date.now();
+          wishlist.push(newItem);
+          localStorage.setItem('showerWishlist', JSON.stringify(wishlist));
+        }
+        alert('Wishlist item added successfully!');
       }
 
-      document.getElementById('admTitle').value = '';
-      document.getElementById('admPrice').value = '250.00';
-      document.getElementById('admImage').value = '';
-      for (let i = 1; i <= 4; i++) {
+      resetWishlistForm();
+      renderWishlist();
+      renderAdminManageItems();
+      renderAdminPurchases();
+    }
+
+    function editRegistryItem(itemId) {
+      const item = wishlist.find(i => i.id === itemId);
+      if (!item) return;
+
+      // Switch to Add/Edit tab
+      switchAdminTab('wishlist');
+
+      // Populate form fields
+      document.getElementById('editItemId').value = item.id;
+      document.getElementById('admTitle').value = item.title;
+      document.getElementById('admQty').value = item.qtyRequired;
+      document.getElementById('admImage').value = item.image || '';
+
+      // Clear & populate stores
+      for (let i = 1; i <= 3; i++) {
         document.getElementById(`admStore${i}Name`).value = '';
+        document.getElementById(`admStore${i}Price`).value = '';
         document.getElementById(`admStore${i}Link`).value = '';
       }
-      alert('Wishlist item added successfully with store options!');
+
+      if (item.stores && item.stores.length > 0) {
+        item.stores.forEach((s, idx) => {
+          const num = idx + 1;
+          if (num <= 3) {
+            document.getElementById(`admStore${num}Name`).value = s.name;
+            document.getElementById(`admStore${num}Price`).value = s.price;
+            document.getElementById(`admStore${num}Link`).value = s.url;
+          }
+        });
+      }
+
+      // Update button text & show cancel
+      document.getElementById('formHeaderTitle').innerText = `Edit Item: "${item.title}"`;
+      document.getElementById('saveItemFormBtn').innerText = 'Save Changes';
+      document.getElementById('cancelEditBtn').classList.remove('hidden');
+    }
+
+    function resetWishlistForm() {
+      document.getElementById('editItemId').value = '';
+      document.getElementById('admTitle').value = '';
+      document.getElementById('admQty').value = '1';
+      document.getElementById('admImage').value = '';
+      for (let i = 1; i <= 3; i++) {
+        document.getElementById(`admStore${i}Name`).value = '';
+        document.getElementById(`admStore${i}Price`).value = '';
+        document.getElementById(`admStore${i}Link`).value = '';
+      }
+      document.getElementById('formHeaderTitle').innerText = 'Add New Wishlist Item (with Multiple Stores & Prices):';
+      document.getElementById('saveItemFormBtn').innerText = '+ Add Item To Registry';
+      document.getElementById('cancelEditBtn').classList.add('hidden');
     }
 
     function renderAdminManageItems() {
@@ -1157,13 +1248,18 @@
           <div class="flex items-center gap-3 overflow-hidden">
             <img src="${item.image || 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400'}" class="w-10 h-10 rounded-lg object-cover border border-slate-200 shrink-0">
             <div class="truncate">
-              <p class="font-bold text-slate-800 truncate">${escapeHtml(item.title)} - R${(parseFloat(item.price)||0).toFixed(2)}</p>
+              <p class="font-bold text-slate-800 truncate">${escapeHtml(item.title)} (${getItemPriceRange(item)})</p>
               <p class="text-[11px] text-slate-500">${item.qtyClaimed} of ${item.qtyRequired} claimed</p>
             </div>
           </div>
-          <button onclick="deleteRegistryItem('${item.id}')" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg font-bold text-xs transition shrink-0 flex items-center gap-1">
-            <i class="fa-solid fa-trash text-[10px]"></i> Delete
-          </button>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="editRegistryItem('${item.id}')" class="px-3 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-600 border border-sky-200 rounded-lg font-bold text-xs transition flex items-center gap-1">
+              <i class="fa-solid fa-pen text-[10px]"></i> Edit
+            </button>
+            <button onclick="deleteRegistryItem('${item.id}')" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg font-bold text-xs transition flex items-center gap-1">
+              <i class="fa-solid fa-trash text-[10px]"></i> Delete
+            </button>
+          </div>
         </div>
       `).join('');
     }
@@ -1178,6 +1274,32 @@
         localStorage.setItem('showerWishlist', JSON.stringify(wishlist));
         renderWishlist();
         renderAdminManageItems();
+        renderAdminPurchases();
+      }
+    }
+
+    // Purchase Tracker Deletion (Syncs and decreases progress bar count)
+    function deletePurchaseClaim(itemId, claimId) {
+      if (!confirm("Are you sure you want to delete this purchase entry? This will restore the item count on the wishlist progress bar.")) return;
+
+      const item = wishlist.find(i => i.id === itemId);
+      if (!item || !item.claims) return;
+
+      const claimIndex = item.claims.findIndex(c => c.id === claimId);
+      if (claimIndex !== -1) {
+        const removedClaim = item.claims[claimIndex];
+        item.qtyClaimed = Math.max(0, (item.qtyClaimed || 0) - removedClaim.qty);
+        item.claims.splice(claimIndex, 1);
+
+        if (itemsRef) {
+          itemsRef.child(itemId).set(item);
+        } else {
+          localStorage.setItem('showerWishlist', JSON.stringify(wishlist));
+          renderWishlist();
+          renderAdminManageItems();
+          renderAdminPurchases();
+        }
+        alert("Purchase claim deleted and wishlist progress successfully updated!");
       }
     }
 
@@ -1225,28 +1347,42 @@
 
     function renderAdminPurchases() {
       const container = document.getElementById('adminPurchasesList');
-      const claimedItems = wishlist.filter(i => i.qtyClaimed > 0);
+      let allClaimsHtml = '';
+      let totalClaimsCount = 0;
 
-      if (claimedItems.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-400 italic">No items claimed yet.</p>`;
+      wishlist.forEach(item => {
+        if (item.claims && item.claims.length > 0) {
+          item.claims.forEach(c => {
+            totalClaimsCount++;
+            allClaimsHtml += `
+              <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs flex justify-between items-center gap-2">
+                <div class="overflow-hidden">
+                  <p class="font-bold text-slate-800 truncate">${escapeHtml(item.title)}</p>
+                  <p class="text-[11px] text-slate-600">
+                    <strong>Giver:</strong> ${escapeHtml(c.giver || 'Anonymous')} | 
+                    <strong>Qty:</strong> ${c.qty} | 
+                    <strong>Store:</strong> ${escapeHtml(c.store || 'N/A')} (R${(parseFloat(c.price)||0).toFixed(2)})
+                  </p>
+                </div>
+                <button onclick="deletePurchaseClaim('${item.id}', '${c.id}')" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg font-bold text-xs transition shrink-0 flex items-center gap-1" title="Delete Claim & Restore Item Count">
+                  <i class="fa-solid fa-trash text-[10px]"></i> Delete
+                </button>
+              </div>
+            `;
+          });
+        }
+      });
+
+      if (totalClaimsCount === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 italic">No purchase claims recorded yet.</p>`;
         return;
       }
 
-      container.innerHTML = claimedItems.map(item => `
-        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1">
-          <div class="flex justify-between font-bold text-slate-800">
-            <span>${escapeHtml(item.title)}</span>
-            <span class="text-emerald-600">${item.qtyClaimed} of ${item.qtyRequired} claimed</span>
-          </div>
-          <div class="text-[11px] text-slate-500">
-            <strong>Givers:</strong> ${item.claims ? item.claims.map(c => `${c.giver} (${c.qty})`).join(', ') : 'Anonymous'}
-          </div>
-        </div>
-      `).join('');
+      container.innerHTML = allClaimsHtml;
     }
 
     function escapeHtml(str) {
-      return str.replace(/[&<>"']/g, function(m) {
+      return (str || '').replace(/[&<>"']/g, function(m) {
         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
       });
     }
